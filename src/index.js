@@ -1,23 +1,32 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const express = require('express');
-
-const { ApolloServer } = require('apollo-server-express');
 const http = require('http');
+const express = require('express');
+const cors = require('cors')
+const { ApolloServer } = require('apollo-server-express');
+const jwt = require('jsonwebtoken')
+
 const typeDefs = require('./grapql/schema/typeDefs');
 const resolvers = require('./grapql/resolvers');
+const upload = require('./uploader');
 
 const PORT = process.env.PORT;
 const app = express();
 
-const jwt = require('jsonwebtoken')
+
+app.use('/uploads', express.static('uploads'));
+app.use(cors({ origin: '*' }))
 
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req }) => {
+  context: ({ req, connection }) => {
+    if (connection) {
+      // check connection for metadata
+      return connection.context;
+    }
     const authorization = req.headers.authorization
     const token = authorization ? authorization.replace('Bearer ', '') : ''
     let user = null;
@@ -32,6 +41,18 @@ const server = new ApolloServer({
 server.applyMiddleware({
   app
 });
+
+
+app.post('/file', upload.single('file'), (req, res, next) => {
+  const file = req.file
+  if (!file) {
+    const error = new Error('Please upload a file')
+    error.httpStatusCode = 400
+    return next(error)
+  }
+
+  res.send({ filename: file.filename })
+})
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);

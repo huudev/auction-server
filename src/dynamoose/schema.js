@@ -112,7 +112,8 @@ const AuctionProduct = dynamoose.model('AuctionProduct',{
 			map: {
 				time: String,
 				price: Number,
-				user: String
+				userName: String,
+				userId: String
 			}
 		}]
 	},

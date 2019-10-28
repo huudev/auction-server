@@ -13,10 +13,8 @@ module.exports = {
 	Mutation: {
 		...User.mutation, ...AuctionProduct.mutation
 	},
-	Response: {
-		__resolveType() {
-			return null;
-		}
+	Subscription: {
+		...AuctionProduct.subscription
 	},
 	MutationResponse: {
 		__resolveType() {

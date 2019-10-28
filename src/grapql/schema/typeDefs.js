@@ -40,7 +40,8 @@ const typeDefs = gql`
 	type AuctionHistory {
 		time: String,
 		price: Int,
-		user: User
+		userName: String,
+		userId: String
 	}
 
 	type AuctionCondition {
@@ -64,10 +65,10 @@ const typeDefs = gql`
 		winner: String
 		description: String
 		status: Int
-		productCategory: String
+		productCategory: ProductCategory
 		auctionHistory: [AuctionHistory]
 		auctionCondition: AuctionCondition
-		auctionType: String
+		auctionType: AuctionType
 		owner: User
 	}
 
@@ -76,7 +77,7 @@ const typeDefs = gql`
 		refreshToken: String
 	}
 
-	interface Response {
+	type Response {
 		code: String!
 		success: Boolean!
 		message: String!
@@ -93,8 +94,6 @@ const typeDefs = gql`
 		auctionProducts: [AuctionProduct]
 		auctionProductsExist: [AuctionProduct]
 	}
-
-	
 
 	interface MutationResponse {
 		code: String!
@@ -142,6 +141,11 @@ const typeDefs = gql`
 		role: String
 	}
 
+	input AuctionConditionInput {
+		vipAccount: Boolean,
+		accountActiveDay: Int
+	}
+
 	input ProductInput {
 		ownerId: String
 		createTime: Date
@@ -153,12 +157,15 @@ const typeDefs = gql`
 		currentPrice: Int
 		floorPrice: Int
 		priceStep: Int
+		stepPrice: Int
+		ceilingPrice: Int
 		finalPrice: Int
 		winner: String
 		description: String
 		status: Int
 		productCategory: String
 		auctionType: String
+		auctionCondition: AuctionConditionInput
 	}
 
 	type Mutation {
@@ -168,6 +175,10 @@ const typeDefs = gql`
 		lockUser(id: String): DeleteUserMutationResponse
 		addProduct(product: ProductInput): Response
 		auction(ownerId: String!,createTime: Date!,price: Int!): Response
+	}
+
+	type Subscription {
+		auctionAdded(product: ProductInput): AuctionProduct!
 	}
 
 
