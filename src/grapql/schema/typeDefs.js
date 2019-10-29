@@ -38,7 +38,7 @@ const typeDefs = gql`
 	}
 
 	type AuctionHistory {
-		time: String,
+		time: Date,
 		price: Int,
 		userName: String,
 		userId: String
@@ -91,7 +91,7 @@ const typeDefs = gql`
 		user(id: ID!): User
 		users: [User]
 		auctionProduct(ownerId: String!,createTime: Date!): AuctionProduct
-		auctionProducts: [AuctionProduct]
+		auctionProducts(ownerId: String,userId: String): [AuctionProduct]
 		auctionProductsExist: [AuctionProduct]
 	}
 

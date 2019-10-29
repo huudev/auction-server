@@ -25,12 +25,18 @@ module.exports.query = {
 	login: async (parent, { userName, password }, context, info) => {
 		let user = (await User.scan({ userName }).exec())[0]
 		if (!user)
-			return { }
+			return {}
 		let same = await bcrypt.compare(password, user.hashPassword)
 		if (!same) {
-			return { }
+			return {}
 		} else {
-			return signToken({id:user.id,userName: user.userName,role: user.role})
+			return signToken({
+				id: user.id,
+				userName: user.userName,
+				role: user.role,
+				createTime: userName.createTime,
+				vipMember: user.vipMember
+			})
 		}
 
 	},

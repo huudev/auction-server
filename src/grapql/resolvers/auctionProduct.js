@@ -4,13 +4,23 @@ const { AuthenticationError, withFilter, PubSub } = require('apollo-server-expre
 const pubsub = new PubSub();
 
 const AUCTION_ADDED = 'AUCTION_ADDED'
+const LISTENER_ADD = 'LISTENER_ADD'
+
+
 
 module.exports.query = {
 	auctionProduct: async (parent, { ownerId, createTime }, context, info) => {
 		return await AuctionProduct.get({ ownerId, createTime })
 	},
-	auctionProducts: async (parent, args, context, info) => {
-		return await AuctionProduct.scan().exec()
+	auctionProducts: async (parent, args, { ownerId, userId }, info) => {
+		if (ownerId) {
+			return await AuctionProduct.query({ ownerId }).exec()
+		} else if (userId) {
+			return await AuctionProduct.scan().exec()
+		} else {
+			return await AuctionProduct.scan().exec()
+		}
+
 	},
 	auctionProductsExist: async (parent, args, context, info) => {
 		return await AuctionProduct.scan('endTime').gt(new Date()).exec()
@@ -33,6 +43,13 @@ module.exports.mutation = {
 				}
 		}
 		product.auctionHistory.push({ time: new Date(), userName: user.userName, userId: user.id, price });
+		User.get({ id: user.id }, (err, user) => {
+			user.products = user.products || []
+			if (!user.products.some(p => p.ownerId == product.ownerId && p.createTime.getTime() == product.createTime.getTime())) {
+				user.products.push({ ownerId: product.ownerId, createTime: product.createTime })
+				User.update({ id: user.id }, user)
+			}
+		})
 		await AuctionProduct.update({ ownerId, createTime }, product);
 		pubsub.publish(AUCTION_ADDED, { auctionAdded: product });
 		return {
@@ -83,9 +100,11 @@ module.exports.auctionProduct = {
 
 module.exports.subscription = {
 	auctionAdded: {
-		subscribe: () => pubsub.asyncIterator(AUCTION_ADDED),
 		subscribe: withFilter(
-			() => pubsub.asyncIterator(AUCTION_ADDED),
+			(parent, { product }, context, info) => {
+				pubsub.publish(LISTENER_ADD, product)
+				return pubsub.asyncIterator(AUCTION_ADDED)
+			},
 			(payload, { product }) => {
 				let newUpdate = payload.auctionAdded;
 				return newUpdate.ownerId == product.ownerId && newUpdate.createTime.getTime() == product.createTime.getTime();
@@ -93,3 +112,38 @@ module.exports.subscription = {
 		),
 	}
 }
+
+const listProductListener = new Map()
+
+function setUpAuctionTimeOut(setProduct, product) {
+	setProduct.add(product.createTime.getTime())
+	console.log(product.endTime.getTime());
+
+	let currentDate = new Date()
+	setTimeout(async function (product) {
+		let originalProduct = await AuctionProduct.get({ ownerId: product.ownerId, createTime: product.createTime })
+		if (originalProduct.auctionHistory && originalProduct.auctionHistory.length > 0) {
+			originalProduct.winner = originalProduct.auctionHistory[originalProduct.auctionHistory.length - 1].userName;
+		}
+		originalProduct.status = 2
+		pubsub.publish(AUCTION_ADDED, { auctionAdded: originalProduct });
+		AuctionProduct.update({ ownerId: product.ownerId, createTime: product.createTime }, originalProduct)
+	}, product.endTime.getTime() - currentDate.getTime(), product)
+}
+
+function addProductListener(product) {
+	if (listProductListener.has(product.ownerId)) {
+		let setProduct = listProductListener.get(product.ownerId)
+		if (!setProduct.has(product.createTime.getTime())) {
+			setUpAuctionTimeOut(setProduct, product)
+		}
+	} else {
+		let setProduct = new Set()
+		listProductListener.set(product.ownerId, setProduct)
+		setUpAuctionTimeOut(setProduct, product)
+	}
+}
+
+pubsub.subscribe(LISTENER_ADD, product => {
+	addProductListener(product)
+})

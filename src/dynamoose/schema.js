@@ -22,8 +22,8 @@ const dynamoose = require('./config')
 // 		console.log('ok');
 // 		else
 // 		console.log(JSON.stringify(result,null,' '));
-		
-		
+
+
 // })
 //dynamoose.setDDB(dynamodb)
 
@@ -38,7 +38,7 @@ const Role = dynamoose.model('Role', {
 	}
 })
 
-const ProductCategory = dynamoose.model('ProductCategory',{
+const ProductCategory = dynamoose.model('ProductCategory', {
 	id: {
 		type: String,
 		hashKey: true
@@ -46,7 +46,7 @@ const ProductCategory = dynamoose.model('ProductCategory',{
 	name: String
 })
 
-const AuctionType = dynamoose.model('AuctionType',{
+const AuctionType = dynamoose.model('AuctionType', {
 	id: {
 		type: String,
 		hashKey: true
@@ -55,7 +55,7 @@ const AuctionType = dynamoose.model('AuctionType',{
 	ruleDescription: String
 })
 
-const User = dynamoose.model('User',{
+const User = dynamoose.model('User', {
 	id: {
 		type: String,
 		hashKey: true
@@ -76,10 +76,20 @@ const User = dynamoose.model('User',{
 	role: {
 		type: String,
 		required: true
+	},
+	products: {
+		type: 'list',
+		list: [{
+			type: 'map',
+			map: {
+				ownerId: String,
+				createTime: Date
+			}
+		}]
 	}
 })
 
-const AuctionProduct = dynamoose.model('AuctionProduct',{
+const AuctionProduct = dynamoose.model('AuctionProduct', {
 	ownerId: {
 		type: String,
 		hashKey: true
@@ -93,13 +103,13 @@ const AuctionProduct = dynamoose.model('AuctionProduct',{
 	endTime: Date,
 	avatar: String,
 	images: {
-		type:[String],
+		type: [String],
 		default: []
 	},
 	currentPrice: Number,
 	floorPrice: Number,
 	priceStep: Number,
-	ceilingPrice:Number,
+	ceilingPrice: Number,
 	finalPrice: Number,
 	winner: String,
 	description: String,
@@ -110,7 +120,7 @@ const AuctionProduct = dynamoose.model('AuctionProduct',{
 		list: [{
 			type: 'map',
 			map: {
-				time: String,
+				time: Date,
 				price: Number,
 				userName: String,
 				userId: String

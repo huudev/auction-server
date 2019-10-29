@@ -11,8 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "alarm": "^2.0.0",
     "apollo-server-express": "^2.9.7",
-    "aws-sdk": "^2.553.0",
+    "aws-sdk": "^2.556.0",
     "bcrypt": "^3.0.6",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
