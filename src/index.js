@@ -36,6 +36,11 @@ const server = new ApolloServer({
 
     return { user, req, token }
   },
+  formatError: (err)=>{
+    console.log(err);
+    
+    return err;
+  }
 });
 
 server.applyMiddleware({

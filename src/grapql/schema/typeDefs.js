@@ -78,6 +78,11 @@ const typeDefs = gql`
 		refreshToken: String
 	}
 
+	type ThongKe {
+		vip: Int
+		nonVip: Int
+	}
+
 	type Response {
 		code: String!
 		success: Boolean!
@@ -94,6 +99,7 @@ const typeDefs = gql`
 		auctionProduct(ownerId: String!,createTime: Date!): AuctionProduct
 		auctionProducts(ownerId: String,userId: String): [AuctionProduct]
 		auctionProductsExist: [AuctionProduct]
+		thongKe: ThongKe
 	}
 
 	interface MutationResponse {
@@ -140,6 +146,9 @@ const typeDefs = gql`
 		phoneNumber: String
 		email: String
 		role: String
+		createTime: Date
+		vipMember: Boolean
+		amount: Int
 	}
 
 	input AuctionConditionInput {

@@ -45,7 +45,11 @@ module.exports.query = {
 	},
 	users: async (parent, args, context, info) => {
 		return await User.scan().exec()
-	}
+	},
+	thongKe: async (parent, args, context, info) => {
+		let rs = await User.scan('vipMember').eq(true).counts().exec()
+		return { vip: rs.count, nonVip: rs.scannedCount - rs.count }
+	},
 }
 
 module.exports.mutation = {
