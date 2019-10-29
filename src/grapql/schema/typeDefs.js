@@ -35,6 +35,7 @@ const typeDefs = gql`
 		createTime: Date
 		amount: Int
 		role: String
+		products: [AuctionProduct]
 	}
 
 	type AuctionHistory {

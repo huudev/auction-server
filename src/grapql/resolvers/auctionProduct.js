@@ -12,11 +12,9 @@ module.exports.query = {
 	auctionProduct: async (parent, { ownerId, createTime }, context, info) => {
 		return await AuctionProduct.get({ ownerId, createTime })
 	},
-	auctionProducts: async (parent, args, { ownerId, userId }, info) => {
+	auctionProducts: async (parent, args, { ownerId }, info) => {
 		if (ownerId) {
 			return await AuctionProduct.query({ ownerId }).exec()
-		} else if (userId) {
-			return await AuctionProduct.scan().exec()
 		} else {
 			return await AuctionProduct.scan().exec()
 		}
@@ -61,6 +59,19 @@ module.exports.mutation = {
 	addProduct: async (parent, { product }, { user }, info) => {
 		if (!user)
 			new AuthenticationError('must authenticate');
+		let originalUser =await User.get({ id: user.id })
+		let amount = originalUser.amount || 0
+		
+		if (amount < 10000) {
+			return {
+				code: 422,
+				success: false,
+				message: 'Số dư trong tài khoản không đủ (từ 10,000VNĐ)'
+			}
+		} else {
+			originalUser.amount = originalUser.amount - 10000
+			await User.update({ id: user.id }, originalUser)
+		}
 		product.ownerId = user.id
 		product.status = 1
 		product.createTime = new Date()
