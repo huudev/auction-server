@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const http = require('http');
+const path = require('path')
 const express = require('express');
 const cors = require('cors')
 const { ApolloServer } = require('apollo-server-express');
@@ -11,12 +12,14 @@ const typeDefs = require('./grapql/schema/typeDefs');
 const resolvers = require('./grapql/resolvers');
 const upload = require('./uploader');
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const app = express();
 
-
 app.use('/uploads', express.static('uploads'));
-app.use(cors({ origin: '*' }))
+
+if (!process.env.NODE_ENV == 'production') {
+  app.use(cors({ origin: '*' }))
+}
 
 
 const server = new ApolloServer({
@@ -36,9 +39,9 @@ const server = new ApolloServer({
 
     return { user, req, token }
   },
-  formatError: (err)=>{
+  formatError: (err) => {
     console.log(err);
-    
+
     return err;
   }
 });
@@ -58,6 +61,12 @@ app.post('/file', upload.single('file'), (req, res, next) => {
 
   res.send({ filename: file.filename })
 })
+
+app.use(express.static(path.resolve('dist/client')));
+
+app.get('/*', function (req, res) {
+  res.sendFile(path.resolve('dist/client/index.html'));
+});
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
