@@ -20,7 +20,11 @@ module.exports.query = {
 		}
 
 	},
-	auctionProductsExist: async (parent, args, context, info) => {
+	auctionProductsExist: async (parent, { categoryId }, info) => {
+		if (categoryId) {
+			
+			return await AuctionProduct.scan('endTime').gt(new Date()).and().where('productCategory').eq(categoryId).exec()
+		}
 		return await AuctionProduct.scan('endTime').gt(new Date()).exec()
 	}
 }
@@ -59,9 +63,9 @@ module.exports.mutation = {
 	addProduct: async (parent, { product }, { user }, info) => {
 		if (!user)
 			new AuthenticationError('must authenticate');
-		let originalUser =await User.get({ id: user.id })
+		let originalUser = await User.get({ id: user.id })
 		let amount = originalUser.amount || 0
-		
+
 		if (amount < 10000) {
 			return {
 				code: 422,

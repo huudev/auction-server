@@ -98,7 +98,7 @@ const typeDefs = gql`
 		users: [User]
 		auctionProduct(ownerId: String!,createTime: Date!): AuctionProduct
 		auctionProducts(ownerId: String,userId: String): [AuctionProduct]
-		auctionProductsExist: [AuctionProduct]
+		auctionProductsExist(categoryId: String): [AuctionProduct]
 		thongKe: ThongKe
 	}
 
