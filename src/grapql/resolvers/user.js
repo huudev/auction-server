@@ -40,7 +40,14 @@ module.exports.query = {
 		}
 
 	},
-	user: async (parent, { id }, context, info) => {
+	user: async (parent, { id, userName }, context, info) => {
+		if (userName) {
+			let user = (await User.scan({ userName }).exec())[0]
+			if (!user)
+				return null
+			else
+				return user
+		}
 		return await User.get(id)
 	},
 	users: async (parent, args, context, info) => {

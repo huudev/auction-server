@@ -94,7 +94,7 @@ const typeDefs = gql`
 		roles: [Role]
 		productCategories: [ProductCategory]
 		auctionTypes: [AuctionType]
-		user(id: ID!): User
+		user(id: ID,userName: String): User
 		users: [User]
 		auctionProduct(ownerId: String!,createTime: Date!): AuctionProduct
 		auctionProducts(ownerId: String,userId: String): [AuctionProduct]
