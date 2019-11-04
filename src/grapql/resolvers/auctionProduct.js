@@ -12,7 +12,7 @@ module.exports.query = {
 	auctionProduct: async (parent, { ownerId, createTime }, context, info) => {
 		return await AuctionProduct.get({ ownerId, createTime })
 	},
-	auctionProducts: async (parent, args, { ownerId }, info) => {
+	auctionProducts: async (parent, { ownerId }, context, info) => {
 		if (ownerId) {
 			return await AuctionProduct.query({ ownerId }).exec()
 		} else {
@@ -20,9 +20,9 @@ module.exports.query = {
 		}
 
 	},
-	auctionProductsExist: async (parent, { categoryId }, info) => {
+	auctionProductsExist: async (parent, { categoryId }, context, info) => {
 		if (categoryId) {
-			
+
 			return await AuctionProduct.scan('endTime').gt(new Date()).and().where('productCategory').eq(categoryId).exec()
 		}
 		return await AuctionProduct.scan('endTime').gt(new Date()).exec()

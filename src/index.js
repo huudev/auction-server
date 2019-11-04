@@ -18,9 +18,9 @@ const app = express();
 app.use('/uploads', express.static('uploads'));
 
 
-if (process.env.NODE_ENV != 'production') {
+//if (process.env.NODE_ENV != 'production') {
   app.use(cors({ origin: '*' }))
-}
+//}
 
 
 const server = new ApolloServer({
